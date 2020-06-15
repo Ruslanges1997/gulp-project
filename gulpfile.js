@@ -1,8 +1,3 @@
-// function defaultTask(cb) {
-//     console.log('Gulp works')
-//     cb();
-// }
-// exports.default = defaultTask
 
 const gulp = require('gulp');
 const sass = require('gulp-sass');
@@ -32,7 +27,12 @@ const paths = {
     html: {
         src: 'app/**/*.html',
         dest: 'build/'
+    },
+    font: {
+        src: 'app/font/**/*.*',
+        dest: 'build/font'
     }
+
 }
 
 function browser(done) {
@@ -44,19 +44,25 @@ function browser(done) {
     });
     done();
 }
+
 function browserReload(done) {
     browserSync.reload();
     done();
 }
 
-function images(){
+function images() {
     return gulp.src(paths.images.src)
         .pipe(image())
         .pipe(gulp.dest(paths.images.dest))
         .pipe(browserSync.stream())
 }
+function font() {
+    return gulp.src(paths.font.src)
+        .pipe(gulp.dest(paths.font.dest))
+        .pipe(browserSync.stream())
+}
 
-function styles(){
+function styles() {
     return gulp.src(paths.styles.src)
         .pipe(sass().on('error', sass.logError))
         .pipe(autoprefixer())
@@ -66,29 +72,29 @@ function styles(){
         .pipe(browserSync.stream())
 }
 
-function scripts(){
+function scripts() {
     return gulp.src(paths.scripts.src)
         .pipe(concat('main.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest(paths.scripts.dest))
         .pipe(browserSync.stream())
 }
-function html(){
+function html() {
     return gulp.src(paths.html.src)
         .pipe(gulp.dest(paths.html.dest))
         .pipe(browserSync.stream())
 }
 
-function watch(){
+function watch() {
     gulp.watch(paths.images.src, images);
     gulp.watch(paths.styles.src, styles);
     gulp.watch(paths.scripts.src, scripts);
     gulp.watch(paths.html.src, html);
     gulp.watch('./app/*.html', gulp.series(browserReload));
 }
-function clear(){
+function clear() {
     return del(['build']);
 }
-const build = gulp.series(clear, gulp.parallel(images, styles, scripts, html));
+const build = gulp.series(clear, gulp.parallel(images, styles, font, scripts, html));
 gulp.task('build', build);
 gulp.task('default', gulp.parallel(watch, browser, build));
